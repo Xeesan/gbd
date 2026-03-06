@@ -1,0 +1,324 @@
+/* ============================
+   Responsive / Mobile Styles
+   ============================ */
+
+/* Hamburger button (hidden on desktop) */
+.hamburger-btn {
+    display: none;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    flex-shrink: 0;
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 99;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
+/* ===== Tablet (≤1024px) ===== */
+@media (max-width: 1024px) {
+    .stats-row {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .level-section {
+        grid-template-columns: 1fr;
+    }
+
+    .planner-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .kanban-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .semester-section {
+        grid-template-columns: 1fr;
+    }
+
+    .cgpa-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .report-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .reports-charts {
+        grid-template-columns: 1fr;
+    }
+
+    .notes-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .exam-form {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .profile-form {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== Mobile (≤768px) ===== */
+@media (max-width: 768px) {
+
+    /* Sidebar becomes overlay */
+    .hamburger-btn {
+        display: flex;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        bottom: 0;
+        z-index: 100;
+        transition: left 0.3s ease;
+        width: 240px;
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .app-container {
+        grid-template-columns: 1fr;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    /* Header adjustments */
+    .top-header {
+        padding: 12px 16px;
+        gap: 8px;
+    }
+
+    .header-date {
+        font-size: 0.75rem;
+    }
+
+    /* Page container */
+    .page-container {
+        padding: 16px;
+    }
+
+    /* Dashboard */
+    .dashboard-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .header-right {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .inspiration-quote {
+        max-width: 100%;
+        font-size: 1rem;
+    }
+
+    .inspiration-card .big-quote {
+        display: none;
+    }
+
+    .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .level-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+    }
+
+    .quick-access {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    /* Pages */
+    .page-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .page-header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .tab-group {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-item {
+        white-space: nowrap;
+        font-size: 0.7rem;
+        padding: 8px 14px;
+    }
+
+    /* Money */
+    .money-summary {
+        grid-template-columns: 1fr;
+    }
+
+    /* CGPA */
+    .cgpa-cards {
+        grid-template-columns: 1fr;
+    }
+
+    /* Exams */
+    .exam-form {
+        grid-template-columns: 1fr;
+    }
+
+    .exam-form-bottom {
+        grid-template-columns: 1fr;
+    }
+
+    /* Routine day tabs */
+    .day-tabs {
+        gap: 4px;
+    }
+
+    .day-tab {
+        padding: 6px 10px;
+        font-size: 0.65rem;
+    }
+
+    /* Reports */
+    .report-stats {
+        grid-template-columns: 1fr;
+    }
+
+    /* Planner */
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    /* Profile */
+    .profile-actions {
+        flex-direction: column;
+    }
+
+    .copy-id-btn,
+    .logout-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Modals */
+    .note-modal,
+    .period-modal,
+    .transaction-modal {
+        width: 95%;
+        max-width: 95%;
+        padding: 20px;
+    }
+
+    .modal-card {
+        width: 90%;
+        padding: 24px;
+    }
+
+    /* Enable Notif button */
+    .enable-notif-btn {
+        font-size: 0.7rem;
+        padding: 8px 14px;
+    }
+
+    /* Focus timer */
+    .focus-timer .timer-display {
+        font-size: 3.5rem;
+    }
+
+    .focus-btn {
+        padding: 14px 32px;
+        font-size: 0.9rem;
+    }
+}
+
+/* ===== Small Mobile (≤480px) ===== */
+@media (max-width: 480px) {
+    .page-container {
+        padding: 12px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .stats-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .stat-card {
+        padding: 14px 8px;
+    }
+
+    .stat-card-value {
+        font-size: 1.2rem;
+    }
+
+    .level-circle {
+        width: 60px;
+        height: 60px;
+    }
+
+    .level-circle .level-num {
+        font-size: 1.5rem;
+    }
+
+    .welcome-text h1 {
+        font-size: 1.5rem;
+    }
+
+    .inspiration-card {
+        padding: 20px;
+    }
+
+    .inspiration-quote {
+        font-size: 0.9rem;
+    }
+
+    .day-tab {
+        padding: 5px 8px;
+        font-size: 0.6rem;
+    }
+
+    .focus-timer .timer-display {
+        font-size: 2.8rem;
+    }
+
+    .sidebar {
+        width: 220px;
+    }
+}
