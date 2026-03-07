@@ -505,6 +505,24 @@ function switchActiveResource(i) {
 function renderResourceViewer(resource) {
   if (!resource) return '<p style="color:var(--text-muted);text-align:center">No resource selected</p>';
   if (resource.type === 'youtube') {
+    // Extract video ID for thumbnail
+    const idMatch = resource.url.match(/embed\/([a-zA-Z0-9_-]{11})/);
+    const videoId = idMatch ? idMatch[1] : '';
+    const watchUrl = videoId ? `https://www.youtube.com/watch?v=${videoId}` : resource.url;
+    const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : '';
+
+    // Use iframe on http/https, clickable card on file://
+    if (window.location.protocol === 'file:') {
+      return `
+        <a href="${watchUrl}" target="_blank" rel="noopener" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-decoration:none;color:inherit">
+          ${thumbUrl ? `<img src="${thumbUrl}" alt="${resource.title}" style="max-width:90%;max-height:70%;object-fit:contain;border-radius:var(--radius-sm);margin-bottom:16px" />` : ''}
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 24px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:var(--radius);color:var(--accent);font-weight:600">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Watch on YouTube
+          </div>
+          <p style="color:var(--text-muted);font-size:0.75rem;margin-top:8px">Opens in a new tab (embeds require a web server)</p>
+        </a>`;
+    }
     return `<iframe src="${resource.url}" style="width:100%;height:100%;border:none;border-radius:var(--radius-sm)" allowfullscreen></iframe>`;
   } else if (resource.type === 'pdf') {
     return `<iframe src="${resource.url}" style="width:100%;height:100%;border:none;border-radius:var(--radius-sm)"></iframe>`;
