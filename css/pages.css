@@ -301,6 +301,100 @@
     justify-content: space-between;
 }
 
+/* Enhanced Exam Section */
+.exam-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.exam-stat-mini {
+    padding: 16px;
+    text-align: center;
+}
+
+.exam-stat-num {
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+.exam-stat-lbl {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.exam-card-enhanced {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    transition: var(--transition);
+}
+
+.exam-card-enhanced:hover {
+    border-color: var(--accent) !important;
+}
+
+.exam-card-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.exam-countdown-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+.exam-subject-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+}
+
+.exam-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.exam-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.exam-card-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.exam-badge {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
 /* Academic Hub */
 .cgpa-cards {
     display: grid;

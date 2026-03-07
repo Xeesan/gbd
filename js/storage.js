@@ -94,6 +94,12 @@ const Storage = {
     if (!id) return;
     this.setExams(this.getExams().filter(e => e.id !== id));
   },
+  updateExam(exam) {
+    if (!exam || !exam.id) return;
+    const exams = this.getExams();
+    const idx = exams.findIndex(e => String(e.id) === String(exam.id));
+    if (idx !== -1) { exams[idx] = exam; this.setExams(exams); }
+  },
 
   // Semesters (Academic Hub)
   getSemesters() {

@@ -203,6 +203,26 @@
         grid-template-columns: 1fr;
     }
 
+    .exam-card-enhanced {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .exam-card-right {
+        flex-direction: row;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .exam-stats-row {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .exam-stat-num {
+        font-size: 1.4rem;
+    }
+
     /* Routine day tabs */
     .day-tabs {
         gap: 4px;
