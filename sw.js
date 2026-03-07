@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gbd-cache-v3';
+const CACHE_NAME = 'gbd-cache-v4';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -25,7 +25,10 @@ const ASSETS_TO_CACHE = [
     './js/pages/reports.js',
     './js/pages/profile.js',
     './manifest.json',
-    './icon.svg'
+    './icon.svg',
+    './icon-192.png',
+    './icon-512.png',
+    './favicon.svg'
 ];
 
 // Install: cache essential assets

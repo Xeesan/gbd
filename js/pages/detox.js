@@ -504,30 +504,40 @@ function switchActiveResource(i) {
 
 function renderResourceViewer(resource) {
   if (!resource) return '<p style="color:var(--text-muted);text-align:center">No resource selected</p>';
+
   if (resource.type === 'youtube') {
-    // Extract video ID for thumbnail
-    const idMatch = resource.url.match(/embed\/([a-zA-Z0-9_-]{11})/);
-    const videoId = idMatch ? idMatch[1] : '';
-    const watchUrl = videoId ? `https://www.youtube.com/watch?v=${videoId}` : resource.url;
-    const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : '';
+    var idMatch = resource.url.match(/embed\/([a-zA-Z0-9_-]{11})/);
+    var videoId = idMatch ? idMatch[1] : '';
+    var watchUrl = videoId ? 'https://www.youtube.com/watch?v=' + videoId : resource.url;
+    var thumbUrl = videoId ? 'https://img.youtube.com/vi/' + videoId + '/maxresdefault.jpg' : '';
+    var thumbFallback = videoId ? 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg' : '';
 
     // Use iframe on http/https, clickable card on file://
     if (window.location.protocol === 'file:') {
-      return `
-        <a href="${watchUrl}" target="_blank" rel="noopener" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-decoration:none;color:inherit">
-          ${thumbUrl ? `<img src="${thumbUrl}" alt="${resource.title}" style="max-width:90%;max-height:70%;object-fit:contain;border-radius:var(--radius-sm);margin-bottom:16px" />` : ''}
-          <div style="display:flex;align-items:center;gap:10px;padding:12px 24px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:var(--radius);color:var(--accent);font-weight:600">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            Watch on YouTube
-          </div>
-          <p style="color:var(--text-muted);font-size:0.75rem;margin-top:8px">Opens in a new tab (embeds require a web server)</p>
-        </a>`;
+      return '<a href="' + watchUrl + '" target="_blank" rel="noopener" style="display:block;position:relative;width:100%;height:100%;background:#000;border-radius:8px;overflow:hidden;text-decoration:none">'
+        + (thumbUrl ? '<img src="' + thumbUrl + '" onerror="this.src=\'' + thumbFallback + '\'" style="width:100%;height:100%;object-fit:cover;opacity:0.85" />' : '')
+        + '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.25)">'
+        + '<div style="width:72px;height:50px;background:#ff0000;border-radius:14px;display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="9 6 18 12 9 18"/></svg></div>'
+        + '<span style="color:#fff;font-size:0.9rem;margin-top:14px;font-weight:600">' + resource.title + '</span>'
+        + '<span style="color:rgba(255,255,255,0.5);font-size:0.7rem;margin-top:4px">Tap to watch on YouTube</span>'
+        + '</div></a>';
     }
-    return `<iframe src="${resource.url}" style="width:100%;height:100%;border:none;border-radius:var(--radius-sm)" allowfullscreen></iframe>`;
+    return '<iframe src="' + resource.url + '" style="width:100%;height:100%;border:none;border-radius:8px" allowfullscreen></iframe>';
+
   } else if (resource.type === 'pdf') {
-    return `<iframe src="${resource.url}" style="width:100%;height:100%;border:none;border-radius:var(--radius-sm)"></iframe>`;
+    return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;padding:20px">'
+      + '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
+      + '<h3 style="color:var(--text-primary);margin:0">' + resource.title + '</h3>'
+      + '<button onclick="window.open(\'' + resource.url.replace(/'/g, "\\'") + '\',\'_blank\')" style="padding:14px 36px;background:var(--accent);color:#000;border:none;border-radius:8px;font-family:inherit;font-weight:700;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;gap:10px">'
+      + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'
+      + 'Open PDF</button>'
+      + '<p style="color:var(--text-muted);font-size:0.75rem;margin:0">Opens in a new browser tab</p>'
+      + '</div>';
+
   } else {
-    return `<img src="${resource.url}" alt="${resource.title}" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:var(--radius-sm);display:block;margin:auto" />`;
+    return '<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:12px">'
+      + '<img src="' + resource.url + '" alt="' + resource.title + '" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px" />'
+      + '</div>';
   }
 }
 
