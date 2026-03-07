@@ -9,13 +9,128 @@ let focusDuration = 25 * 60; // default 25 min in seconds
 let focusSound = 'none';
 let focusAudio = null;
 let blockedSites = ['facebook.com', 'youtube.com', 'instagram.com', 'twitter.com', 'tiktok.com'];
+let studyResources = [];
+let activeResourceIdx = 0;
+let resourceTab = 'youtube';
 
-// Sound URLs (royalty-free ambient loops)
-const SOUND_URLS = {
-  rain: 'https://cdn.pixabay.com/audio/2022/05/31/audio_39e41b5e42.mp3',
-  white: 'https://cdn.pixabay.com/audio/2024/11/04/audio_664019816f.mp3',
-  lofi: 'https://cdn.pixabay.com/audio/2024/09/10/audio_6e1ceed79b.mp3'
-};
+// Web Audio API sound generators (no external URLs needed)
+let audioCtx = null;
+let audioNodes = [];
+
+function createRainSound(ctx) {
+  // Layer 1: Deep brown noise rumble (low-freq rain body)
+  const bufSize = 2 * ctx.sampleRate;
+  const brownBuf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+  const brownData = brownBuf.getChannelData(0);
+  let lastOut = 0;
+  for (let i = 0; i < bufSize; i++) {
+    const w = Math.random() * 2 - 1;
+    brownData[i] = (lastOut + 0.02 * w) / 1.02;
+    lastOut = brownData[i];
+    brownData[i] *= 3.5;
+  }
+  const brownSrc = ctx.createBufferSource();
+  brownSrc.buffer = brownBuf;
+  brownSrc.loop = true;
+  const lowpass = ctx.createBiquadFilter();
+  lowpass.type = 'lowpass';
+  lowpass.frequency.value = 400;
+  const brownGain = ctx.createGain();
+  brownGain.gain.value = 0.5;
+  brownSrc.connect(lowpass).connect(brownGain).connect(ctx.destination);
+  brownSrc.start();
+
+  // Layer 2: High-freq patter (raindrop crackle)
+  const pinkBuf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+  const pinkData = pinkBuf.getChannelData(0);
+  let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+  for (let i = 0; i < bufSize; i++) {
+    const white = Math.random() * 2 - 1;
+    b0 = 0.99886 * b0 + white * 0.0555179;
+    b1 = 0.99332 * b1 + white * 0.0750759;
+    b2 = 0.96900 * b2 + white * 0.1538520;
+    b3 = 0.86650 * b3 + white * 0.3104856;
+    b4 = 0.55000 * b4 + white * 0.5329522;
+    b5 = -0.7616 * b5 - white * 0.0168980;
+    pinkData[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+    pinkData[i] *= 0.11;
+    b6 = white * 0.115926;
+  }
+  const pinkSrc = ctx.createBufferSource();
+  pinkSrc.buffer = pinkBuf;
+  pinkSrc.loop = true;
+  const bandpass = ctx.createBiquadFilter();
+  bandpass.type = 'bandpass';
+  bandpass.frequency.value = 2500;
+  bandpass.Q.value = 0.3;
+  const pinkGain = ctx.createGain();
+  pinkGain.gain.value = 0.35;
+  pinkSrc.connect(bandpass).connect(pinkGain).connect(ctx.destination);
+  pinkSrc.start();
+
+  return [brownSrc, lowpass, brownGain, pinkSrc, bandpass, pinkGain];
+}
+
+function createWhiteNoiseSound(ctx) {
+  const bufferSize = 2 * ctx.sampleRate;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = Math.random() * 2 - 1;
+  }
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.loop = true;
+  const gain = ctx.createGain();
+  gain.gain.value = 0.15;
+  source.connect(gain).connect(ctx.destination);
+  source.start();
+  return [source, gain];
+}
+
+function createLofiSound(ctx) {
+  // Warm sine chord with slow vibrato
+  const notes = [261.6, 329.6, 392.0]; // C4, E4, G4
+  const nodes = [];
+  const masterGain = ctx.createGain();
+  masterGain.gain.value = 0.12;
+  masterGain.connect(ctx.destination);
+  notes.forEach(freq => {
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 0.3 + Math.random() * 0.2;
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = 2;
+    lfo.connect(lfoGain).connect(osc.frequency);
+    const oscGain = ctx.createGain();
+    oscGain.gain.value = 0.3;
+    osc.connect(oscGain).connect(masterGain);
+    osc.start();
+    lfo.start();
+    nodes.push(osc, lfo, lfoGain, oscGain);
+  });
+  nodes.push(masterGain);
+  return nodes;
+}
+
+function startFocusSound(type) {
+  stopFocusSound();
+  if (type === 'none') return;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (type === 'rain') audioNodes = createRainSound(audioCtx);
+    else if (type === 'white') audioNodes = createWhiteNoiseSound(audioCtx);
+    else if (type === 'lofi') audioNodes = createLofiSound(audioCtx);
+  } catch (e) { console.warn('[Detox] Audio failed:', e); }
+}
+
+function stopFocusSound() {
+  audioNodes.forEach(n => { try { n.stop ? n.stop() : n.disconnect(); } catch (e) { } });
+  audioNodes = [];
+  if (audioCtx) { try { audioCtx.close(); } catch (e) { } audioCtx = null; }
+}
 
 function getTreeStage() {
   const sessions = Storage.getFocusSessions();
@@ -107,6 +222,41 @@ function renderDetox(container) {
         </div>
 
         <div class="focus-section">
+          <label class="focus-label">📚 STUDY RESOURCES</label>
+          <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px">ADD MATERIALS TO VIEW DURING FOCUS</p>
+          <div class="resource-tabs" id="resource-tabs">
+            <button class="res-tab-btn ${resourceTab === 'youtube' ? 'active' : ''}" onclick="switchResourceTab('youtube')">▶ YouTube</button>
+            <button class="res-tab-btn ${resourceTab === 'pdf' ? 'active' : ''}" onclick="switchResourceTab('pdf')">📄 PDF</button>
+            <button class="res-tab-btn ${resourceTab === 'image' ? 'active' : ''}" onclick="switchResourceTab('image')">🖼 Image</button>
+          </div>
+          <div class="resource-form" id="resource-form">
+            <input class="input-simple" id="res-title" placeholder="Resource title" style="margin-bottom:8px" />
+            <div id="res-url-field">
+              <input class="input-simple" id="res-url" placeholder="${resourceTab === 'youtube' ? 'YouTube URL' : resourceTab === 'pdf' ? 'PDF URL' : 'Image URL'}" style="margin-bottom:8px" />
+            </div>
+            ${resourceTab !== 'youtube' ? `
+              <label class="upload-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--accent);font-size:0.8rem;margin-bottom:8px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                Upload from device
+                <input type="file" accept="${resourceTab === 'pdf' ? '.pdf' : 'image/*'}" onchange="handleResourceUpload(event)" style="display:none" />
+              </label>
+            ` : ''}
+            <button class="btn-outline" style="width:100%" onclick="addStudyResource()">+ Add to Library</button>
+          </div>
+          ${studyResources.length > 0 ? `
+            <div class="resource-list" style="margin-top:12px">
+              ${studyResources.map((r, i) => `
+                <div class="resource-item">
+                  <span class="resource-type-badge">${r.type === 'youtube' ? '▶' : r.type === 'pdf' ? '📄' : '🖼'}</span>
+                  <span style="flex:1;font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</span>
+                  <button class="chip-x" onclick="removeStudyResource(${i})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1rem">×</button>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+
+        <div class="focus-section">
           <label class="focus-label">🛡️ DISTRACTION GUARD</label>
           <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px">BLOCKED DOMAINS (REMINDERS)</p>
           <div class="blocked-sites" id="blocked-sites-list">
@@ -194,14 +344,30 @@ function renderActiveFocus(container) {
         </div>
 
         <div class="focus-active-main">
-          <div class="focus-shield-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <path d="M9 12l2 2 4-4" stroke="var(--accent)" stroke-width="2"/>
-            </svg>
-          </div>
-          <h2 style="color:var(--text-primary);margin:16px 0 8px">Deep Focus Active</h2>
-          <p style="color:var(--text-muted);font-size:0.9rem">Stay focused. All distractions are blocked.</p>
+          ${studyResources.length > 0 ? `
+            <!-- Resource Tabs -->
+            <div class="focus-resource-tabs">
+              ${studyResources.map((r, i) => `
+                <button class="focus-res-tab ${i === activeResourceIdx ? 'active' : ''}" onclick="switchActiveResource(${i})">
+                  ${r.type === 'youtube' ? '▶' : r.type === 'pdf' ? '📄' : '🖼'} ${r.title}
+                </button>
+              `).join('')}
+              <button class="focus-res-tab add-res-btn" onclick="quickAddResource()">+</button>
+            </div>
+            <!-- Resource Viewer -->
+            <div class="focus-resource-viewer" id="resource-viewer">
+              ${renderResourceViewer(studyResources[activeResourceIdx])}
+            </div>
+          ` : `
+            <div class="focus-shield-icon">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="M9 12l2 2 4-4" stroke="var(--accent)" stroke-width="2"/>
+              </svg>
+            </div>
+            <h2 style="color:var(--text-primary);margin:16px 0 8px">Deep Focus Active</h2>
+            <p style="color:var(--text-muted);font-size:0.9rem">Stay focused. All distractions are blocked.</p>
+          `}
 
           <div class="focus-active-stats">
             <div class="focus-active-stat-card">
@@ -277,23 +443,102 @@ function addBlockedSite() {
   }
 }
 
+// Study Resources
+function switchResourceTab(tab) {
+  resourceTab = tab;
+  navigateTo('detox');
+  showFocusSetup();
+}
+
+function addStudyResource() {
+  const title = document.getElementById('res-title');
+  const url = document.getElementById('res-url');
+  if (!title || !title.value.trim()) { alert('Please enter a title'); return; }
+  if (!url || !url.value.trim()) { alert('Please enter a URL'); return; }
+
+  let finalUrl = url.value.trim();
+  // Convert YouTube watch URL to embed URL
+  if (resourceTab === 'youtube') {
+    const match = finalUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
+    if (match) finalUrl = 'https://www.youtube.com/embed/' + match[1];
+  }
+
+  studyResources.push({ type: resourceTab, title: title.value.trim(), url: finalUrl });
+  title.value = '';
+  url.value = '';
+  navigateTo('detox');
+  showFocusSetup();
+}
+
+function handleResourceUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const title = document.getElementById('res-title');
+  if (title && !title.value.trim()) title.value = file.name;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const urlInput = document.getElementById('res-url');
+    if (urlInput) urlInput.value = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeStudyResource(i) {
+  studyResources.splice(i, 1);
+  if (activeResourceIdx >= studyResources.length) activeResourceIdx = Math.max(0, studyResources.length - 1);
+  navigateTo('detox');
+  if (!focusActive) showFocusSetup();
+}
+
+function switchActiveResource(i) {
+  activeResourceIdx = i;
+  const viewer = document.getElementById('resource-viewer');
+  if (viewer && studyResources[i]) {
+    viewer.innerHTML = renderResourceViewer(studyResources[i]);
+  }
+  document.querySelectorAll('.focus-res-tab').forEach((t, idx) => {
+    t.classList.toggle('active', idx === i);
+  });
+}
+
+function renderResourceViewer(resource) {
+  if (!resource) return '<p style="color:var(--text-muted);text-align:center">No resource selected</p>';
+  if (resource.type === 'youtube') {
+    return `<iframe src="${resource.url}" style="width:100%;height:100%;border:none;border-radius:var(--radius-sm)" allowfullscreen></iframe>`;
+  } else if (resource.type === 'pdf') {
+    return `<iframe src="${resource.url}" style="width:100%;height:100%;border:none;border-radius:var(--radius-sm)"></iframe>`;
+  } else {
+    return `<img src="${resource.url}" alt="${resource.title}" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:var(--radius-sm);display:block;margin:auto" />`;
+  }
+}
+
+function quickAddResource() {
+  const url = prompt('Paste YouTube, PDF, or Image URL:');
+  if (!url || !url.trim()) return;
+  const title = prompt('Give it a title:') || 'Untitled';
+  let type = 'image';
+  if (url.includes('youtube.com') || url.includes('youtu.be')) type = 'youtube';
+  else if (url.endsWith('.pdf')) type = 'pdf';
+
+  let finalUrl = url.trim();
+  if (type === 'youtube') {
+    const match = finalUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
+    if (match) finalUrl = 'https://www.youtube.com/embed/' + match[1];
+  }
+  studyResources.push({ type, title: title.trim(), url: finalUrl });
+  activeResourceIdx = studyResources.length - 1;
+  navigateTo('detox');
+}
+
 // Focus Session Control
 function startFocus() {
   focusActive = true;
   focusStartTime = Date.now();
   focusElapsed = 0;
 
-  // Play sound
-  if (focusSound !== 'none' && SOUND_URLS[focusSound]) {
-    try {
-      focusAudio = new Audio(SOUND_URLS[focusSound]);
-      focusAudio.loop = true;
-      focusAudio.volume = 0.4;
-      focusAudio.play().catch(e => console.warn('Audio play failed:', e));
-    } catch (e) {
-      console.warn('Audio error:', e);
-    }
-  }
+  // Play sound via Web Audio API
+  startFocusSound(focusSound);
 
   navigateTo('detox');
 }
@@ -303,10 +548,7 @@ function stopFocus() {
   clearInterval(focusInterval);
   focusInterval = null;
 
-  if (focusAudio) {
-    focusAudio.pause();
-    focusAudio = null;
-  }
+  stopFocusSound();
 
   const duration = Math.floor((Date.now() - focusStartTime) / 60000);
   if (duration > 0) {
