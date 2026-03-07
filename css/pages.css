@@ -1936,9 +1936,7 @@ select.pdf-cell-input {
     }
 
     .focus-active-sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid var(--border);
+        display: none;
     }
 
     .focus-active-stats {

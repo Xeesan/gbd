@@ -312,11 +312,12 @@
         justify-content: flex-start;
     }
 
-    /* Resource viewer = hero element on mobile */
+    /* Resource viewer — fits content, no excess space */
     .focus-resource-viewer {
-        min-height: 55vh;
-        max-height: 65vh;
-        flex: 1;
+        min-height: 220px;
+        max-height: 45vh;
+        aspect-ratio: 16/9;
+        flex: none;
     }
 
     .focus-resource-tabs {
@@ -434,7 +435,7 @@
     }
 
     .focus-resource-viewer {
-        min-height: 45vh;
+        min-height: 180px;
     }
 
     .focus-active-stat-val {
