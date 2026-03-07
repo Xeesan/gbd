@@ -22,6 +22,8 @@ It's a single web app that replaces a dozen tabs you'd normally have open. Your 
 
 **No sign-ups. No servers. No data leaves your device.** Everything lives in your browser's localStorage. You own your data, always.
 
+> **Inspired by [Meme Branes](https://bydv2.vercel.app/)' "Block Your Dopamine" webapp. Hats off to them.**
+
 ---
 
 ## Features
