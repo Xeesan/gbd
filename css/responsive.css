@@ -263,6 +263,116 @@
         padding: 14px 32px;
         font-size: 0.9rem;
     }
+
+    /* Detox Active Session — Mobile (Resource-First) */
+    .focus-active-view {
+        height: auto;
+        min-height: calc(100vh - var(--header-height));
+    }
+
+    .focus-active-header {
+        padding: 10px 16px;
+        flex-wrap: nowrap;
+        gap: 6px;
+    }
+
+    .focus-active-header h2 {
+        font-size: 1rem;
+    }
+
+    .focus-active-header p {
+        display: none;
+    }
+
+    .focus-active-timer {
+        font-size: 1.8rem;
+    }
+
+    .timer-sep {
+        font-size: 1.4rem;
+    }
+
+    .focus-exit-btn {
+        padding: 6px 14px;
+        font-size: 0.75rem;
+    }
+
+    .focus-active-body {
+        flex-direction: column;
+    }
+
+    /* HIDE tree sidebar on mobile — resources are the priority */
+    .focus-active-sidebar {
+        display: none;
+    }
+
+    .focus-active-main {
+        padding: 12px;
+        align-items: stretch;
+        justify-content: flex-start;
+    }
+
+    /* Resource viewer = hero element on mobile */
+    .focus-resource-viewer {
+        min-height: 55vh;
+        max-height: 65vh;
+        flex: 1;
+    }
+
+    .focus-resource-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 6px;
+        gap: 6px;
+    }
+
+    .focus-res-tab {
+        font-size: 0.7rem;
+        padding: 5px 10px;
+    }
+
+    .focus-active-stats {
+        gap: 12px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .focus-active-stat-card {
+        padding: 10px 20px;
+    }
+
+    .focus-active-stat-val {
+        font-size: 1.3rem;
+    }
+
+    .focus-progress-bar {
+        max-width: 100%;
+        margin-top: 12px;
+    }
+
+    /* No resources = show shield centered */
+    .focus-shield-icon {
+        width: 80px;
+        height: 80px;
+    }
+
+    /* Detox Setup — Mobile */
+    .focus-setup-card {
+        padding: 16px;
+    }
+
+    .duration-buttons,
+    .sound-buttons,
+    .resource-tabs {
+        flex-wrap: wrap;
+    }
+
+    .detox-stats-row {
+        flex-direction: column;
+        gap: 8px;
+    }
 }
 
 /* ===== Small Mobile (≤480px) ===== */
@@ -314,11 +424,20 @@
         font-size: 0.6rem;
     }
 
-    .focus-timer .timer-display {
-        font-size: 2.8rem;
-    }
-
     .sidebar {
         width: 220px;
+    }
+
+    /* Even more compact detox on small phones */
+    .focus-active-timer {
+        font-size: 1.5rem;
+    }
+
+    .focus-resource-viewer {
+        min-height: 45vh;
+    }
+
+    .focus-active-stat-val {
+        font-size: 1.1rem;
     }
 }
